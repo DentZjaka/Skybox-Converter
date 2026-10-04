@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#09101f">
+  <title>LimitS Studio</title>
+  <link rel="stylesheet" href="Asset/Css/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="brand" id="brandBtn" type="button" aria-label="Skybox Studio">
+        <span class="brand-mark">🌏︎</span>
+        <span>
+          <strong>LimitS Studio</strong>
+          <small>Create · Preview · Export</small>
+        </span>
+      </button>
+
+      <div class="top-actions">
+        <button class="icon-btn" id="themeBtn" type="button" title="Ubah tampilan">☀︎</button>
+        <button class="icon-btn" id="helpBtn" type="button" title="Bantuan">?</button>
+        <button class="btn primary" id="exportTopBtn" type="button" disabled>▼ Export 6 Faces</button>
+      </div>
+    </header>
+
+    <aside class="sidebar" id="sidebar">
+      <nav>
+        <button class="nav-item active" data-section="dashboard" type="button"><span>🏠︎</span><b>Dashboard</b></button>
+        <button class="nav-item" data-section="panorama" type="button"><span>🌐︎</span><b>Panorama</b></button>
+        <button class="nav-item" data-section="faces" type="button"><span>♕</span><b>Cube Faces</b></button>
+        <button class="nav-item" data-section="export" type="button"><span>🢃</span><b>Export</b></button>
+        <button class="nav-item" data-section="settings" type="button"><span>🛠</span><b>Settings</b></button>
+      </nav>
+
+      <div class="sidebar-info">
+        <strong>Skybox Converter by LimitS Studio</strong>
+        <p>Turn your 360° panorama into a complete six-sided skybox.</p>
+      </div>
+    </aside>
+    <main class="main-content">
+      <section class="workspace">
+        <div class="preview-card">
+          <div class="section-head">
+            <div>
+              <h1>360° Panorama Preview</h1>
+              <p>Drag untuk melihat sekeliling · Scroll/pinch untuk zoom</p>
+            </div>
+            <span class="status-pill" id="sourceStatus">No image</span>
+          </div>
+
+          <div class="viewer" id="viewer">
+            <div id="viewerCanvas"></div>
+            <div class="storm-placeholder" id="stormPlaceholder" aria-hidden="true">
+              <div class="storm-sky"></div>
+              <div class="cloud-layer cloud-back"><i></i><i></i><i></i><i></i></div>
+              <div class="cloud-layer cloud-front"><i></i><i></i><i></i><i></i></div>
+              <div class="rain-layer" id="rainLayer"></div>
+              <div class="lightning-layer" id="lightningLayer"></div>
+              <div class="storm-vignette"></div>
+            </div>
+            <div class="viewer-badge">⟳ 360°</div>
+            <div class="viewer-help">☝ Drag untuk melihat</div>
+            <div class="compass" id="compass">✴︎</div>
+            <div class="zoom-controls">
+              <button id="zoomOut" type="button">−</button>
+              <button id="zoomReset" type="button">Fit</button>
+              <button id="zoomIn" type="button">+</button>
+            </div>
+            <div class="empty-viewer" id="emptyViewer">
+              <div class="empty-icon">🌐︎</div>
+              <strong>Upload panorama 2:1</strong>
+              <span>PNG, JPG, atau WebP</span>
+              <button class="btn primary" id="emptyUploadBtn" type="button">Pilih Gambar</button>
+            </div>
+          </div>
+
+          <div class="viewer-footer">
+            <div class="file-meta">
+              <div class="file-icon">🌐︎</div>
+              <div>
+                <strong id="fileName">Belum ada panorama</strong>
+                <span id="fileDimensions">Upload gambar untuk mulai</span>
+              </div>
+            </div>
+            <div class="viewer-actions">
+              <button class="btn" id="resetViewBtn" type="button">↻ Reset View</button>
+              <button class="btn" id="fitViewBtn" type="button">◎ Fit 360°</button>
+              <button class="btn auto-rotate-btn" id="autoRotateBtn" type="button">▶ Auto Rotate</button>
+            </div>
+            <div class="rotate-speed-control">
+              <div class="rotate-speed-head">
+                <span>↻ Kecepatan Putar</span>
+                <strong id="rotateSpeedOutput">50%</strong>
+              </div>
+              <input id="rotateSpeed" type="range" min="1" max="100" value="50" step="1"
+                     aria-label="Kecepatan Auto Rotate">
+              <div class="rotate-speed-scale"><span>Lambat</span><span>Cepat</span></div>
+            </div>
+          </div>
+        </div>
+
+        <section class="faces-card">
+          <div class="section-head">
+            <div>
+              <h2>6 Cube Faces</h2>
+              <p>Hasil potongan otomatis dari panorama skybox</p>
+            </div>
+            <div class="head-controls">
+              <label class="compact-label">
+                Resolusi
+                <select id="resolutionSelect">
+                  <option value="256">256 × 256</option>
+                  <option value="512" selected>512 × 512</option>
+                  <option value="1024">1024 × 1024</option>
+                  <option value="2048">2048 × 2048</option>
+                </select>
+              </label>
+              <button class="btn" id="previewAllBtn" type="button" disabled>Preview Semua</button>
+            </div>
+          </div>
+
+          <div class="face-grid" id="faceGrid">
+            <div class="face-placeholder">Belum ada hasil. Upload panorama lalu klik “Generate 6 Faces”.</div>
+          </div>
+        </section>
+      </section>
+
+      <aside class="control-column">
+        <section class="control-card">
+          <div class="control-title">
+            <span>⫶☰</span>
+            <h2>Pengaturan Tampilan</h2>
+            <button class="collapse-btn" type="button" data-collapse="viewSettings">▲</button>
+          </div>
+
+          <div id="viewSettings" class="control-body">
+            <div class="control-group">
+              <div class="label-row"><label for="fov">FOV (Field of View)</label><output id="fovOutput">90°</output></div>
+              <input id="fov" type="range" min="45" max="120" value="90">
+              <div class="range-labels"><span>45°</span><span>120°</span></div>
+            </div>
+
+            <div class="control-group">
+              <div class="label-row"><label for="pitch">Pitch (Vertikal)</label><output id="pitchOutput">0°</output></div>
+              <input id="pitch" type="range" min="-89" max="89" value="0">
+              <div class="range-labels"><span>-89°</span><span>89°</span></div>
+            </div>
+
+            <div class="control-group">
+              <div class="label-row"><label for="yaw">Yaw (Horizontal)</label><output id="yawOutput">0°</output></div>
+              <input id="yaw" type="range" min="-180" max="180" value="0">
+              <div class="range-labels"><span>-180°</span><span>180°</span></div>
+            </div>
+
+            <div class="control-group">
+              <label for="brightness">Brightness</label>
+              <input id="brightness" type="range" min="50" max="150" value="100">
+            </div>
+
+            <div class="control-group">
+              <label for="saturation">Saturation</label>
+              <input id="saturation" type="range" min="0" max="200" value="100">
+            </div>
+
+            <div class="button-row">
+              <button class="btn" id="resetControlsBtn" type="button">↻ Reset</button>
+              <button class="btn" id="fitControlsBtn" type="button">◎ Fit 360°</button>
+            </div>
+
+            <div class="mode-block">
+              <label>Mode Tampilan</label>
+              <div class="mode-grid">
+                <button class="mode-btn active" data-mode="panorama" type="button"><span>🌐︎</span>Panorama</button>
+                <button class="mode-btn" data-mode="cube" type="button"><span>♕</span>Cube Preview</button>
+                <button class="mode-btn" data-mode="grid" type="button"><span>▦</span>Grid View</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="control-card quick-card">
+          <div class="control-title">
+            <span>🗲</span>
+            <h2>Aksi Cepat</h2>
+            <button class="collapse-btn" type="button" data-collapse="quickActions">▲</button>
+          </div>
+
+          <div id="quickActions" class="control-body">
+            <button class="btn primary wide" id="generateBtn" type="button" disabled>✂ Generate 6 Faces</button>
+            <button class="btn wide" id="downloadZipBtn" type="button" disabled>🢃 Download Semua (ZIP)</button>
+            <button class="btn wide" id="downloadIndividualBtn" type="button" disabled>🢃 Download Individu</button>
+
+            <div class="format-box">
+              <strong>Format Output</strong>
+              <label><input type="radio" name="format" value="png" checked> PNG <small>Kualitas terbaik</small></label>
+              <label><input type="radio" name="format" value="jpeg"> JPG <small>Ukuran lebih kecil</small></label>
+            </div>
+          </div>
+        </section>
+
+        <section class="tips-card">
+          <strong>Tips</strong>
+          <p>Gunakan panorama equirectangular dengan rasio <b>2:1</b>, misalnya 4096×2048 atau 8192×4096.</p>
+        </section>
+      </aside>
+    </main>
+
+    <nav class="mobile-nav">
+      <button class="mobile-nav-item active" data-mobile="dashboard" type="button">🏠︎<span>Home</span></button>
+      <button class="mobile-nav-item" data-mobile="panorama" type="button">🌐︎<span>Panorama</span></button>
+      <button class="mobile-nav-item" data-mobile="faces" type="button">♕<span>Faces</span></button>
+      <button class="mobile-nav-item" data-mobile="export" type="button">🢃<span>Export</span></button>
+      <button class="mobile-nav-item" data-mobile="settings" type="button">🛠<span>Settings</span></button>
+    </nav>
+  </div>
+
+  <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+
+  <div class="modal hidden" id="helpModal">
+    <div class="modal-box">
+      <button class="modal-close" id="helpClose" type="button">×</button>
+      <h2>Cara menggunakan Skybox Converter</h2>
+      <ol>
+        <li>Upload gambar panorama equirectangular dengan rasio 2:1.</li>
+        <li>Gunakan mouse atau jari untuk melihat panorama 360°.</li>
+        <li>Atur FOV, Pitch, Yaw, brightness, dan saturation jika diperlukan.</li>
+        <li>Pilih resolusi cube face.</li>
+        <li>Klik <b>Generate 6 Faces</b>.</li>
+        <li>Download semua sebagai ZIP atau download masing-masing face.</li>
+      </ol>
+      <p>Semua proses gambar dilakukan di browser pengguna.</p>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="allFacesModal">
+    <div class="modal-box wide-modal">
+      <button class="modal-close" id="allFacesClose" type="button">×</button>
+      <h2>Preview Semua Cube Faces</h2>
+      <div class="all-faces-grid" id="allFacesGrid"></div>
+    </div>
+  </div>
+
+  <script type="module" src="Data/app.js"></script>
+</body>
+</html>
